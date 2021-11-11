@@ -1,26 +1,64 @@
-# test-project
+# sails-obj-bug
 
 a [Sails v1](https://sailsjs.com) application
 
 
-### Links
+### Migrations
 
-+ [Sails framework documentation](https://sailsjs.com/get-started)
-+ [Version notes / upgrading](https://sailsjs.com/documentation/upgrading)
-+ [Deployment tips](https://sailsjs.com/documentation/concepts/deployment)
-+ [Community support options](https://sailsjs.com/support)
-+ [Professional / enterprise options](https://sailsjs.com/enterprise)
+Run the following migrations before lifting the app
 
+```
+CREATE DATABASE test_db;
+CREATE USER test_user WITH ENCRYPTED PASSWORD 'password';
+GRANT ALL PRIVILEGES ON DATABASE test_db TO test_user;
+```
 
-### Version info
+```
+CREATE TABLE user_actions (
+  id serial PRIMARY KEY,
+  user_id integer,
+  action_name varchar(255) not null,
+  created_at timestamp with time zone DEFAULT now() NOT NULL,
+  updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
 
-This app was originally generated on Thu Nov 11 2021 12:14:48 GMT+0530 (India Standard Time) using Sails v1.5.0.
+INSERT INTO user_actions ( user_id, action_name )
+VALUES (1, 'This is test data'), (2, 'This_is_test_data');
+```
 
-<!-- Internally, Sails used [`sails-generate@2.0.4`](https://github.com/balderdashy/sails-generate/tree/v2.0.4/lib/core-generators/new). -->
+### API Route to test
 
+GET /test-action
 
+### Output on console
 
-<!--
-Note:  Generators are usually run using the globally-installed `sails` CLI (command-line interface).  This CLI version is _environment-specific_ rather than app-specific, thus over time, as a project's dependencies are upgraded or the project is worked on by different developers on different computers using different versions of Node.js, the Sails dependency in its package.json file may differ from the globally-installed Sails CLI release it was originally generated with.  (Be sure to always check out the relevant [upgrading guides](https://sailsjs.com/upgrading) before upgrading the version of Sails used by your app.  If you're stuck, [get help here](https://sailsjs.com/support).)
--->
-
+```
+Current value: {
+  createdAt: 2021-11-11T07:22:31.297Z,
+  updatedAt: 2021-11-11T07:22:31.297Z,
+  id: 1,
+  user: 1,
+  action: 'This is test data'
+}
+After passing the object to update function
+Modified value: {
+  id: 1,
+  created_at: 2021-11-11T07:22:31.297Z,
+  updated_at: 2021-11-11T07:22:31.297Z,
+  user_id: 1,
+  action_name: 'This is test data'
+}
+Current value: {
+  createdAt: 2021-11-11T07:22:53.407Z,
+  updatedAt: 2021-11-11T07:22:53.407Z,
+  user: 2,
+  action: 'This_is_test_data'
+}
+After passing the object to create function
+Modified value: {
+  created_at: 2021-11-11T07:22:53.407Z,
+  updated_at: 2021-11-11T07:22:53.407Z,
+  user_id: 2,
+  action_name: 'This_is_test_data'
+}
+```
